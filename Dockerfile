@@ -9,7 +9,12 @@ COPY . .
 RUN go build -trimpath -ldflags "-s -w" -o /out/dsfree2api ./cmd/dsfree2api
 
 FROM alpine:3.21
-RUN apk add --no-cache ca-certificates tzdata \
+# Chromium: Turnstile browser-mode solver. The chromium-solver wrapper injects
+# --no-sandbox (required inside containers, the app runs as uid 10001 without
+# user namespaces) and --disable-dev-shm-usage (default /dev/shm is 64MB).
+RUN apk add --no-cache ca-certificates tzdata chromium \
+    && printf '#!/bin/sh\nexec /usr/bin/chromium-browser --no-sandbox --disable-dev-shm-usage --disable-gpu "$@"\n' > /usr/local/bin/chromium-solver \
+    && chmod +x /usr/local/bin/chromium-solver \
     && adduser -D -H -u 10001 app
 WORKDIR /app
 COPY --from=build /out/dsfree2api /usr/local/bin/dsfree2api

@@ -13,7 +13,7 @@ FROM alpine:3.21
 # --no-sandbox (required inside containers, the app runs as uid 10001 without
 # user namespaces) and --disable-dev-shm-usage (default /dev/shm is 64MB).
 RUN apk add --no-cache ca-certificates tzdata chromium \
-    && printf '#!/bin/sh\nexec /usr/bin/chromium-browser --no-sandbox --disable-dev-shm-usage --disable-gpu "$@"\n' > /usr/local/bin/chromium-solver \
+    && printf '#!/bin/sh\nexec /usr/bin/chromium-browser --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-crashpad --disable-setuid-sandbox --no-zygote "$@"\n' > /usr/local/bin/chromium-solver \
     && chmod +x /usr/local/bin/chromium-solver \
     && adduser -D -H -u 10001 app
 WORKDIR /app
